@@ -8,6 +8,10 @@ const userSchema = new mongoose.Schema({
         min: 2,
         max:255
     },
+    fullname:{
+        type: String,
+        max: 255
+    },
     email:{
         type: String,
         required:true,
@@ -22,6 +26,22 @@ const userSchema = new mongoose.Schema({
     photo:{
         data: Buffer,
         contentType: String,
+    },
+    bio:{
+        type: String,
+        max: 200
+    },
+    followers:[
+        {type: mongoose.Schema.Types.ObjectId,
+        ref: "User"}
+    ],
+    following:[
+        {type: mongoose.Schema.Types.ObjectId,
+        ref: "User"}
+    ],
+    role:{
+        type: Number,
+        default: 0
     },
     date:{
         type: Date,

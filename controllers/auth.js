@@ -1,5 +1,6 @@
 const User = require('../models/User')
 const bcrypt =require('bcryptjs')
+const ProfilePic = require('../models/ProfilePics')
 const jwt = require('jsonwebtoken')
 
 exports.signup=async(req,res)=>{
@@ -19,12 +20,16 @@ exports.signup=async(req,res)=>{
     }
     //Hash the password
     const hashedPassword = await bcrypt.hash(req.body.password,10); 
+    
+    //getting a default profile pic
+    const defaultPicture = await ProfilePic.findOne({name: "billy"});
 
-    //Creating the usr
+    //Creating the user
     const user = new User({
         username: req.body.username,
         email: req.body.email,
-        password: hashedPassword
+        password: hashedPassword,
+        photo: defaultPicture.photo
     })
 
     try{

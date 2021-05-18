@@ -1,8 +1,9 @@
 const User = require('../models/User')
+const ProfilePic = require('../models/ProfilePics')
 const formidable = require('formidable')
 const fs = require('fs')
 
-exports.getUserById = (req,res,next)=>{
+exports.getCurrentUserById = (req,res,next)=>{
 
     User.findById(req.params.userId)
     .exec((err,user)=>{
@@ -23,36 +24,117 @@ exports.editProfile = async (req,res)=>{
     form.keepExtensions = true;
 
     form.parse(req,async(err,fields,file)=>{
+        
         if(err){
             return res.status(400).json({
                 error: "problem with image"
             })
         }
-        //console.log(file);
-        // let user = new User(fields);
-        let photo ={
-            data: fs.readFileSync(file.photo.path),
-            contentType: file.photo.path
-        }
-        //console.log(photo);
+        const {fullname,bio} = fields;
+        
         if(file.photo){
-            if(file.photo.size > 3000000){
+            let photo ={
+                data: fs.readFileSync(file.photo.path),
+                contentType: file.photo.path
+            }
+            if(file.photo.size > 1000000){
                 return res.status(400).json({
                     error: "file size too big"
                 })
             }
+            await User.findOneAndUpdate({_id: userId},{photo: photo,fullname: fullname,bio: bio});
         }
-
-        let result = await User.findOneAndUpdate({_id: userId},{photo: photo});
-        return res.json(result)
+        else{
+            if(fullname && bio){
+                await User.findOneAndUpdate({_id: userId},{fullname: fullname,bio: bio});
+            }
+            else if(fullname){
+                await User.findOneAndUpdate({_id: userId},{fullname: fullname});
+            }
+            else if(bio){
+                await User.findOneAndUpdate({_id: userId},{bio: bio});
+            }
+        }
+        
+        return res.json({
+            message: "user updated"
+        })
     })
 }
 
-exports.photo = (req,res,next)=>{
-    
-    if(req.user.photo.data){
-        res.set("Content-Type",req.user.photo.contentType);
-        return res.send(req.user.photo.data)
-    }
-    next();
+exports.checkFollow=(req,res)=>{
+
+    const userProfileId = req.params.userProfileId
+    const userId = req.params.userId
+
+    User.findById({_id: userId},'following').exec(async(err,user)=>{
+        if(err){
+            return res.json({
+                error: err
+            })
+        }
+        const follow = user.following.includes(userProfileId);
+        const userFollowersData = await User.findById({_id: userProfileId},'followers following');
+        return res.json({
+            follow: follow,
+            followers: userFollowersData.followers.length,
+            following: userFollowersData.following.length
+        })
+    })
 }
+
+exports.setFollow = async(req,res)=>{
+    
+    const userProfileId = req.params.userProfileId
+    const userId = req.params.userId
+
+    try {
+        const sizeOfFollowing = await User.findById({_id: userId},'following');
+        const sizeOfFollowers = await User.findById({_id: userProfileId},'followers');
+
+        if(sizeOfFollowing.following.length >=1 && sizeOfFollowers.followers.length>=1){
+
+            await User.findOneAndUpdate({_id: userId},{$addToSet:{following: userProfileId}})
+            await User.findOneAndUpdate({_id: userProfileId},{$addToSet:{followers: userId}})
+        }
+        else if(sizeOfFollowing.following.length >=1 && sizeOfFollowers.followers.length < 1){
+
+            await User.findOneAndUpdate({_id: userId},{$addToSet:{following: userProfileId}})
+            await User.findOneAndUpdate({_id: userProfileId},{$push:{followers: userId}})
+        }
+        else if(sizeOfFollowing.following.length < 1 && sizeOfFollowers.followers.length>=1){
+
+            await User.findOneAndUpdate({_id: userId},{$push:{following: userProfileId}})
+            await User.findOneAndUpdate({_id: userProfileId},{$addToSet:{followers: userId}})
+        }
+        else if(sizeOfFollowing.following.length < 1 && sizeOfFollowers.followers.length < 1){
+
+            await User.findOneAndUpdate({_id: userId},{$push:{following: userProfileId}})
+            await User.findOneAndUpdate({_id: userProfileId},{$push:{followers: userId}})
+        }
+        
+    } catch (error) {
+        return res.json(error)
+    }
+    return res.json({
+        message: "following"
+    })
+    
+}
+
+exports.removeFollow=async(req,res)=>{
+
+    const userProfileId = req.params.userProfileId
+    const userId = req.params.userId
+
+    try {
+        await User.findByIdAndUpdate({_id: userId},{$pull:{following: userProfileId}})
+        await User.findByIdAndUpdate({_id: userProfileId},{$pull:{followers:userId}})
+        return res.json({
+            message: "unfollowed"
+        })
+    } catch (error) {
+        return res.json(error)
+    }
+}
+

@@ -6,6 +6,7 @@ const dotenv = require('dotenv')
 
 dotenv.config()
 
+mongoose.set('useFindAndModify', false);
 //database connection
 mongoose.connect(process.env.DB_CONNECT,
 {
@@ -21,10 +22,12 @@ mongoose.connect(process.env.DB_CONNECT,
 const authRoutes=require('./routes/auth')
 const userRoutes=require('./routes/user')
 const profileRoutes = require('./routes/profile')
+const helperRoutes = require('./routes/helper')
 
 app.use(express.json())
 app.use(cors())
 
+app.use('/api/helper',helperRoutes)
 app.use('/api/user',authRoutes)
 app.use('/api/user/:userId',userRoutes)
 app.use('/api/user/profile/:userId',profileRoutes)
