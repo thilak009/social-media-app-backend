@@ -1,5 +1,5 @@
 const User = require('../models/User')
-const ProfilePic = require('../models/ProfilePics')
+//const ProfilePic = require('../models/ProfilePics')
 const formidable = require('formidable')
 const fs = require('fs')
 
@@ -89,30 +89,8 @@ exports.setFollow = async(req,res)=>{
     const userId = req.params.userId
 
     try {
-        const sizeOfFollowing = await User.findById({_id: userId},'following');
-        const sizeOfFollowers = await User.findById({_id: userProfileId},'followers');
-
-        if(sizeOfFollowing.following.length >=1 && sizeOfFollowers.followers.length>=1){
-
-            await User.findOneAndUpdate({_id: userId},{$addToSet:{following: userProfileId}})
-            await User.findOneAndUpdate({_id: userProfileId},{$addToSet:{followers: userId}})
-        }
-        else if(sizeOfFollowing.following.length >=1 && sizeOfFollowers.followers.length < 1){
-
-            await User.findOneAndUpdate({_id: userId},{$addToSet:{following: userProfileId}})
-            await User.findOneAndUpdate({_id: userProfileId},{$push:{followers: userId}})
-        }
-        else if(sizeOfFollowing.following.length < 1 && sizeOfFollowers.followers.length>=1){
-
-            await User.findOneAndUpdate({_id: userId},{$push:{following: userProfileId}})
-            await User.findOneAndUpdate({_id: userProfileId},{$addToSet:{followers: userId}})
-        }
-        else if(sizeOfFollowing.following.length < 1 && sizeOfFollowers.followers.length < 1){
-
-            await User.findOneAndUpdate({_id: userId},{$push:{following: userProfileId}})
-            await User.findOneAndUpdate({_id: userProfileId},{$push:{followers: userId}})
-        }
-        
+        await User.findByIdAndUpdate({_id: userId},{$addToSet:{following: userProfileId}})
+        await User.findByIdAndUpdate({_id: userProfileId},{$addToSet:{followers: userId}})  
     } catch (error) {
         return res.json(error)
     }

@@ -51,22 +51,69 @@ exports.getPostById=(req,res,next)=>{
     })
 }
 
-exports.getAllPosts = async(req,res)=>{
+exports.getAllPosts = (req,res)=>{
     
-    const posts = await Post.find().populate('postedBy','-email -password -photo')
-    .sort({createdAt: "desc"})
-
-    return res.status(200).json(posts)
+    const userId = req.params.userId
+    try {
+        Post.find().populate('postedBy','-email -password -photo -followers -following -bio')
+        .sort({createdAt: "desc"}).exec((err,posts)=>{
+            if(err){
+                return res.json({
+                    message: "unable to fetch posts"
+                })
+            }
+            const requiredPostDetails = posts.map((post)=>{
+                const {_id,title,description,createdAt,updatedAt,postedBy,upvotes,downvotes} = post;
+                const addedDetails = {
+                    _id: _id,
+                    title: title,
+                    description: description,
+                    createdAt: createdAt,
+                    updatedAt: updatedAt,
+                    postedBy: postedBy,
+                    upvoted: upvotes.includes(userId),
+                    downvoted: downvotes.includes(userId),
+                    count: upvotes.length - downvotes.length
+                }
+                return addedDetails
+            })
+            return res.status(200).json(requiredPostDetails)
+        })
+    } catch (error) {
+        return res.json({
+            error: error
+        })
+    }
 }
 
-exports.getUserPosts=async(req,res)=>{
+exports.getUserPosts=(req,res)=>{
 
     const userId = req.params.userProfileId
     
-    const posts = await Post.find({postedBy: userId}).populate('postedBy','-email -password -photo')
-    .sort({createdAt: "desc"})
-
-    return res.status(200).json(posts)
+    Post.find({postedBy: userId}).populate('postedBy','-email -password -photo')
+    .sort({createdAt: "desc"}).exec((err,posts)=>{
+        if(err){
+            return res.json({
+                message: "unable to fetch posts"
+            })
+        }
+        const requiredPostDetails = posts.map((post)=>{
+            const {_id,title,description,createdAt,updatedAt,postedBy,upvotes,downvotes} = post;
+            const addedDetails = {
+                _id: _id,
+                title: title,
+                description: description,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                postedBy: postedBy,
+                upvoted: upvotes.includes(userId),
+                downvoted: downvotes.includes(userId),
+                count: upvotes.length - downvotes.length
+            }
+            return addedDetails
+        })
+        return res.status(200).json(requiredPostDetails)
+    })
 }
 
 exports.deletePost = (req,res)=>{
@@ -107,6 +154,68 @@ exports.deletePost = (req,res)=>{
     } 
     catch (error) {
         return res.status(500).json({
+            error: error
+        })
+    }
+}
+
+exports.upvoteAPost=async(req,res)=>{
+
+    const userId = req.params.userId
+    const postId = req.params.postId
+    try {
+        await Post.findByIdAndUpdate({_id: postId},{$addToSet:{upvotes: userId},$pull:{downvotes: userId}})  
+        return res.json({
+            messaage: "upvoted"
+        })    
+    } catch (error) {
+        return res.json({
+            error: error
+        })
+    }
+}
+
+exports.removeUpvote=async(req,res)=>{
+
+    const userId = req.params.userId
+    const postId = req.params.postId
+    try {
+        await Post.findByIdAndUpdate({_id: postId},{$pull:{upvotes: userId}})  
+        return res.json({
+            messaage: "removed upvote"
+        })    
+    } catch (error) {
+        return res.json({
+            error: error
+        })
+    }
+}
+
+exports.downvoteAPost=async(req,res)=>{
+    const userId = req.params.userId
+    const postId = req.params.postId
+    try {
+        await Post.findByIdAndUpdate({_id: postId},{$pull:{upvotes: userId},$addToSet:{downvotes: userId}})  
+        return res.json({
+            messaage: "downvoted"
+        })    
+    } catch (error) {
+        return res.json({
+            error: error
+        })
+    }
+}
+
+exports.removeDownvote=async(req,res)=>{
+    const userId = req.params.userId
+    const postId = req.params.postId
+    try {
+        await Post.findByIdAndUpdate({_id: postId},{$pull:{downvotes: userId}})  
+        return res.json({
+            messaage: "downvote removed"
+        })    
+    } catch (error) {
+        return res.json({
             error: error
         })
     }
