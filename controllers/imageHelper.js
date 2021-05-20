@@ -1,4 +1,5 @@
 const ProfilePic = require('../models/ProfilePics')
+const User = require('../models/User')
 
 exports.getImageCatalog= async(req,res)=>{
 
@@ -34,9 +35,7 @@ exports.getAImageFromCatalog=async(req,res)=>{
         return res.send(requiredImage.photo.data)
     }
 }
-//i guess i don't need this anymore i used this in
-//Profile.js in frontend but i changed to UserProfile.js
-//so yeah might remove it
+
 exports.getUserPhoto = (req,res,next)=>{
     
     if(req.user.photo.data){
