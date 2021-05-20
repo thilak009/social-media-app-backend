@@ -19,7 +19,7 @@ exports.getImageCatalog= async(req,res)=>{
     }
     catch(error){
         return res.status(401).json({
-            error: error
+            error: "cannot get the images"
         })
     }
 }

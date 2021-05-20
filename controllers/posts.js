@@ -58,24 +58,9 @@ exports.getAllPosts = (req,res)=>{
         .sort({createdAt: "desc"}).exec((err,posts)=>{
             if(err){
                 return res.json({
-                    message: "unable to fetch posts"
+                    message: err
                 })
             }
-            // const requiredPostDetails = posts.map((post)=>{
-            //     const {_id,title,description,createdAt,updatedAt,postedBy,upvotes,downvotes} = post;
-            //     const addedDetails = {
-            //         _id: _id,
-            //         title: title,
-            //         description: description,
-            //         createdAt: createdAt,
-            //         updatedAt: updatedAt,
-            //         postedBy: postedBy,
-            //         upvoted: upvotes.includes(userId),
-            //         downvoted: downvotes.includes(userId),
-            //         count: upvotes.length - downvotes.length
-            //     }
-            //     return addedDetails
-            // })
             return res.status(200).json(posts)
         })
     } catch (error) {
@@ -97,21 +82,6 @@ exports.getUserPosts=(req,res)=>{
                 message: "unable to fetch posts"
             })
         }
-        // const requiredPostDetails = posts.map((post)=>{
-        //     const {_id,title,description,createdAt,updatedAt,postedBy,upvotes,downvotes} = post;
-        //     const addedDetails = {
-        //         _id: _id,
-        //         title: title,
-        //         description: description,
-        //         createdAt: createdAt,
-        //         updatedAt: updatedAt,
-        //         postedBy: postedBy,
-        //         upvoted: upvotes.includes(userId),
-        //         downvoted: downvotes.includes(userId),
-        //         count: upvotes.length - downvotes.length
-        //     }
-        //     return addedDetails
-        //})
         return res.status(200).json(posts)
     })
 }
