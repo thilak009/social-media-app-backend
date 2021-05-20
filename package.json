@@ -1,13 +1,13 @@
 {
   "name": "social-media-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "a social media app",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "start": "node index.js"
   },
-  "author": "",
+  "author": "thilak",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
