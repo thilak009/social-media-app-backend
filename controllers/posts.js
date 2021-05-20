@@ -1,6 +1,5 @@
 const Post = require('../models/Posts')
 const Comment = require('../models/Comment')
-//const User = require('../models/User')
 
 exports.createPost = async(req,res)=>{
 
@@ -55,29 +54,29 @@ exports.getAllPosts = (req,res)=>{
     
     const userId = req.params.userId
     try {
-        Post.find().populate('postedBy','-email -password -photo -followers -following -bio')
+        Post.find({},'-upvotes -downvotes').populate('postedBy','-email -password -photo -followers -following -bio')
         .sort({createdAt: "desc"}).exec((err,posts)=>{
             if(err){
                 return res.json({
                     message: "unable to fetch posts"
                 })
             }
-            const requiredPostDetails = posts.map((post)=>{
-                const {_id,title,description,createdAt,updatedAt,postedBy,upvotes,downvotes} = post;
-                const addedDetails = {
-                    _id: _id,
-                    title: title,
-                    description: description,
-                    createdAt: createdAt,
-                    updatedAt: updatedAt,
-                    postedBy: postedBy,
-                    upvoted: upvotes.includes(userId),
-                    downvoted: downvotes.includes(userId),
-                    count: upvotes.length - downvotes.length
-                }
-                return addedDetails
-            })
-            return res.status(200).json(requiredPostDetails)
+            // const requiredPostDetails = posts.map((post)=>{
+            //     const {_id,title,description,createdAt,updatedAt,postedBy,upvotes,downvotes} = post;
+            //     const addedDetails = {
+            //         _id: _id,
+            //         title: title,
+            //         description: description,
+            //         createdAt: createdAt,
+            //         updatedAt: updatedAt,
+            //         postedBy: postedBy,
+            //         upvoted: upvotes.includes(userId),
+            //         downvoted: downvotes.includes(userId),
+            //         count: upvotes.length - downvotes.length
+            //     }
+            //     return addedDetails
+            // })
+            return res.status(200).json(posts)
         })
     } catch (error) {
         return res.json({
@@ -88,31 +87,32 @@ exports.getAllPosts = (req,res)=>{
 
 exports.getUserPosts=(req,res)=>{
 
-    const userId = req.params.userProfileId
+    const userId = req.params.userId
+    const userProfileId = req.params.userProfileId
     
-    Post.find({postedBy: userId}).populate('postedBy','-email -password -photo')
+    Post.find({postedBy: userProfileId},'-upvotes -downvotes').populate('postedBy','-email -password -photo -followers -following')
     .sort({createdAt: "desc"}).exec((err,posts)=>{
         if(err){
             return res.json({
                 message: "unable to fetch posts"
             })
         }
-        const requiredPostDetails = posts.map((post)=>{
-            const {_id,title,description,createdAt,updatedAt,postedBy,upvotes,downvotes} = post;
-            const addedDetails = {
-                _id: _id,
-                title: title,
-                description: description,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                postedBy: postedBy,
-                upvoted: upvotes.includes(userId),
-                downvoted: downvotes.includes(userId),
-                count: upvotes.length - downvotes.length
-            }
-            return addedDetails
-        })
-        return res.status(200).json(requiredPostDetails)
+        // const requiredPostDetails = posts.map((post)=>{
+        //     const {_id,title,description,createdAt,updatedAt,postedBy,upvotes,downvotes} = post;
+        //     const addedDetails = {
+        //         _id: _id,
+        //         title: title,
+        //         description: description,
+        //         createdAt: createdAt,
+        //         updatedAt: updatedAt,
+        //         postedBy: postedBy,
+        //         upvoted: upvotes.includes(userId),
+        //         downvoted: downvotes.includes(userId),
+        //         count: upvotes.length - downvotes.length
+        //     }
+        //     return addedDetails
+        //})
+        return res.status(200).json(posts)
     })
 }
 
@@ -159,12 +159,45 @@ exports.deletePost = (req,res)=>{
     }
 }
 
-exports.upvoteAPost=async(req,res)=>{
+exports.getVoteDetails=(req,res)=>{
 
     const userId = req.params.userId
     const postId = req.params.postId
     try {
-        await Post.findByIdAndUpdate({_id: postId},{$addToSet:{upvotes: userId},$pull:{downvotes: userId}})  
+        Post.findById({_id: postId}).exec((err,post)=>{
+            if(err){
+                return res.json({
+                    message: "unable to fetch post votes details"
+                })
+            }
+            const {count,upvotes,downvotes} = post
+            const requiredPostDetails = {
+                count: upvotes.length - downvotes.length,
+                upvoted: upvotes.includes(userId),
+                downvoted: downvotes.includes(userId)
+            }
+            return res.json(requiredPostDetails)
+        })        
+    } catch (error) {
+        return res.json({
+            error: error
+        })
+    }
+}
+
+exports.upvoteAPost=async(req,res)=>{
+
+    const userId = req.params.userId
+    const postId = req.params.postId
+    const downvoted = req.body.downvoted
+
+    try {
+        if(downvoted){
+            await Post.findByIdAndUpdate({_id: postId},{$pull:{downvotes: userId},$addToSet:{upvotes: userId}})
+        }
+        else{
+            await Post.findByIdAndUpdate({_id: postId},{$addToSet:{upvotes: userId}})
+        }
         return res.json({
             messaage: "upvoted"
         })    
@@ -194,8 +227,15 @@ exports.removeUpvote=async(req,res)=>{
 exports.downvoteAPost=async(req,res)=>{
     const userId = req.params.userId
     const postId = req.params.postId
+    const upvoted = req.body.upvoted
+
     try {
-        await Post.findByIdAndUpdate({_id: postId},{$pull:{upvotes: userId},$addToSet:{downvotes: userId}})  
+        if(upvoted){
+            await Post.findByIdAndUpdate({_id: postId},{$pull:{upvotes: userId},$addToSet:{downvotes: userId}})
+        }
+        else{
+            await Post.findByIdAndUpdate({_id: postId},{$addToSet:{downvotes: userId}})
+        }
         return res.json({
             messaage: "downvoted"
         })    

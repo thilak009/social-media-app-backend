@@ -1,5 +1,4 @@
 const User = require('../models/User')
-//const ProfilePic = require('../models/ProfilePics')
 const formidable = require('formidable')
 const fs = require('fs')
 
@@ -17,7 +16,7 @@ exports.getCurrentUserById = (req,res,next)=>{
     })
 }
 
-exports.editProfile = async (req,res)=>{
+exports.editProfile = async(req,res)=>{
 
     const userId = req.params.userId;
     let form = new formidable.IncomingForm();
@@ -115,4 +114,5 @@ exports.removeFollow=async(req,res)=>{
         return res.json(error)
     }
 }
+
 
