@@ -140,9 +140,10 @@ exports.getVoteDetails=(req,res)=>{
                     message: "unable to fetch post votes details"
                 })
             }
-            const {count,upvotes,downvotes} = post
+            const {upvotes,downvotes} = post
             const requiredPostDetails = {
-                count: upvotes.length - downvotes.length,
+                upvoteCount: upvotes.length,
+                downvoteCount: downvotes.length,
                 upvoted: upvotes.includes(userId),
                 downvoted: downvotes.includes(userId)
             }

@@ -55,7 +55,7 @@ exports.getComments = (req,res)=>{
     
     //TODO: only load like 10-20 comments
     try {
-        Comment.findOne({postId: postId}).populate('users.userId','username').exec((err,comments)=>{
+        Comment.findOne({postId: postId}).populate('users.userId','username fullname').exec((err,comments)=>{
             if(err){
                 return res.status(400).json({
                     error: "unable to find the post"

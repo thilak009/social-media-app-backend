@@ -9,8 +9,8 @@ router.param('postId',getPostById)
 
 //ROUTES
 router.get('/',isSignedin,getAllPosts)
-router.get('/profile/:userProfileId',getUserProfile)
-router.get('/profile/:userProfileId/posts',getUserPosts)
+router.get('/profile/:userProfileId',isSignedin,getUserProfile)
+router.get('/profile/:userProfileId/posts',isSignedin,getUserPosts)
 router.get('/:postId/get-comments',isSignedin,getComments)
 router.get('/:postId/get-votes',isSignedin,getVoteDetails)
 
