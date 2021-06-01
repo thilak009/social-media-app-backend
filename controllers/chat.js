@@ -1,4 +1,4 @@
-const {Inbox, Chat,Message} = require('../models/Inbox')
+const {Chat,Message} = require('../models/Inbox')
 const User = require('../models/User')
 const { initializeSocket } = require('../socket')
 
@@ -23,8 +23,6 @@ exports.checkChatRoom=async(req,res)=>{
 }
 exports.getAllMessages=async(req,res)=>{
     const chatId = req.params.chatId
-
-    
 
     const messages = await Message.find({chatId: chatId})
     return res.status(200).json(messages)

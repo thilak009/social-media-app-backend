@@ -3,15 +3,15 @@ const app=express()
 const mongoose=require('mongoose')
 const cors = require('cors')
 const dotenv = require('dotenv')
-// const http= require('http')
-// const server = http.createServer(app)
-// const {Server} =require('socket.io')
-// const io = new Server(server,{
-//     cors:{
-//         origin: 'http://localhost:3000',
-//         methods: ["GET","POST"]
-//     }
-// })
+const http= require('http')
+const server = http.createServer(app)
+const {Server} =require('socket.io')
+const io = new Server(server,{
+    cors:{
+        origin: 'http://localhost:3000',
+        methods: ["GET","POST"]
+    }
+})
 
 dotenv.config()
 
@@ -47,22 +47,20 @@ app.use('/api/user/:userId',userRoutes)
 app.use('/api/user/profile/:userId',profileRoutes)
 app.use('/api/user/chat/:userId',chatRoutes)
 
-// io.on('connection',(socket)=>{
-//     socket.on('connect chat',chatId=>{
-//         socket.join(chatId)
-//     })
-//     socket.on('new message',(messageData)=>{
-//         const {message,chatId,userId} = messageData
-//         const ownerUserId = userId
-//         io.to(chatId).emit('new message',{message,ownerUserId});
-//     })
-//     socket.on('is typing',(data)=>{
-//         const {username,chatId} = data
-//         socket.to(chatId).emit('is typing',username)
-//     })
-// })
+io.on('connection',(socket)=>{
+    socket.on('connect chat',chatId=>{
+        socket.join(chatId)
+    })
+    socket.on('new message',(messageData)=>{
+        const {message,chatId,userId} = messageData
+        const ownerUserId = userId
+        io.to(chatId).emit('new message',{message,ownerUserId});
+    })
+    socket.on('is typing',(data)=>{
+        const {username,chatId} = data
+        socket.to(chatId).emit('is typing',username)
+    })
+})
 
 
-// server.listen(port,()=>console.log(`server on ${port}`))
-
-app.listen(port,()=>console.log(`server on ${port}`))
+server.listen(port,()=>console.log(`server on ${port}`))
