@@ -29,7 +29,7 @@ exports.createComment = (req,res)=>{
                 comment: comment
             }}
         })
-        .exec((err,postComments)=>{
+        .exec((err,comment)=>{
             if(err){
                 return res.status(500).json({
                     error: "cannot find the post" 

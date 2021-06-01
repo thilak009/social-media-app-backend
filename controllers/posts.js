@@ -52,17 +52,33 @@ exports.getPostById=(req,res,next)=>{
 
 exports.getAllPosts = (req,res)=>{
     
-    const userId = req.params.userId
+    // const userId = req.params.userId
+    const lastId = req.header('lastId')
     try {
-        Post.find({},'-upvotes -downvotes').populate('postedBy','-email -password -photo -followers -following -bio')
-        .sort({createdAt: "desc"}).exec((err,posts)=>{
-            if(err){
-                return res.json({
-                    message: err
-                })
-            }
-            return res.status(200).json(posts)
-        })
+        if(!lastId){
+            Post.find({},'-upvotes -downvotes').populate('postedBy','-email -password -photo -followers -following -bio')
+            .limit(10)
+            .sort({createdAt: "desc"}).exec((err,posts)=>{
+                if(err){
+                    return res.json({
+                        message: err
+                    })
+                }
+                return res.status(200).json(posts)
+            })
+        }
+        else{
+            Post.find({'_id':{'$lt':lastId}},'-upvotes -downvotes').populate('postedBy','-email -password -photo -followers -following -bio')
+            .limit(10)
+            .sort({createdAt: "desc"}).exec((err,posts)=>{
+                if(err){
+                    return res.json({
+                        message: err
+                    })
+                }
+                return res.status(200).json(posts)
+            })
+        }
     } catch (error) {
         return res.json({
             error: error
