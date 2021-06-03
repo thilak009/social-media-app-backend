@@ -3,7 +3,7 @@ const {isSignedin} =require('./verifyToken')
 
 
 const { createComment, getComments, getUserProfile} = require('../controllers/user')
-const {createPost, getAllPosts,getUserPosts, deletePost, getPostById, upvoteAPost,removeUpvote, downvoteAPost, removeDownvote, getVoteDetails} = require('../controllers/posts')
+const {createPost, getAllPosts,getUserPosts, deletePost, getPostById, upvoteAPost,removeUpvote, downvoteAPost, removeDownvote, getVoteDetails, getPost} = require('../controllers/posts')
 
 router.param('postId',getPostById)
 
@@ -13,6 +13,7 @@ router.get('/profile/:userProfileId',isSignedin,getUserProfile)
 router.get('/profile/:userProfileId/posts',isSignedin,getUserPosts)
 router.get('/:postId/get-comments',isSignedin,getComments)
 router.get('/:postId/get-votes',isSignedin,getVoteDetails)
+router.get('/:postId',isSignedin,getPost)
 
 router.post('/create-post',isSignedin,createPost)
 router.post('/:postId/comment',isSignedin,createComment)

@@ -34,6 +34,19 @@ exports.createPost = async(req,res)=>{
         })
     }
 }
+exports.getPost = (req,res)=>{
+
+    const postId = req.params.postId
+    Post.findById(postId).populate('postedBy','-email -password -photo -followers -following')
+    .exec((err,post)=>{
+        if(err){
+            return res.status(500).json({
+                error: "cannot find post try again"
+            })
+        }
+        return res.json(post)
+    })
+}
 
 exports.getPostById=(req,res,next)=>{
 

@@ -30,13 +30,11 @@ mongoose.connect(process.env.DB_CONNECT,
 app.use(express.json())
 app.use(cors())
 
-//importing routes
 const authRoutes=require('./routes/auth')
 const userRoutes=require('./routes/user')
 const profileRoutes = require('./routes/profile')
 const helperRoutes = require('./routes/helper')
 const chatRoutes = require('./routes/chat')
-
 
 app.get('/',(req,res)=>{
     res.send("hello")
