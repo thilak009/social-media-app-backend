@@ -1,5 +1,6 @@
 const Post = require('../models/Posts')
 const Comment = require('../models/Comment')
+const User= require('../models/User')
 
 exports.createPost = async(req,res)=>{
 
@@ -65,25 +66,45 @@ exports.getPostById=(req,res,next)=>{
     })
 }
 
-exports.getAllPosts = (req,res)=>{
+exports.getAllPosts = async (req,res)=>{
     
-    // const userId = req.params.userId
+    const userId = req.params.userId
     const lastId = req.header('lastId')
     try {
-        if(!lastId){
-            Post.find({},'-upvotes -downvotes').populate('postedBy','-email -password -photo -followers -following -bio')
-            .limit(10)
-            .sort({createdAt: "desc"}).exec((err,posts)=>{
-                if (err) {
-                    console.log(err)
-                    return res.status(400).json({
-                        message: err
-                    })
-                }
-                return res.status(200).json(posts)
-            })
+        const userRole = await User.findOne({ _id: userId }, 'role -_id')
+        console.log(userRole);
+        if (!lastId) {
+            console.log("in if")
+            var tagValue;
+            if (userRole.role == 'Student') {
+                tagValue='Students'
+            }
+            else if (userRole.role == 'Faculty') {
+                tagValue='Faculty'
+            }
+
+            Post.find(
+                {
+                    $or:[
+                        { tag: { "$in": [tagValue, 'All'] } },
+                        { postedBy: { "$in": [userId] } }
+                    ]
+                },'-upvotes -downvotes')
+                .populate('postedBy', '-email -password -photo -followers -following -bio')
+                .limit(10)
+                .sort({createdAt: "desc"}).exec((err,posts)=>{
+                    if (err) {
+                        console.log(err)
+                        return res.status(400).json({
+                            message: err
+                        })
+                    }
+                    return res.status(200).json(posts)
+                })
+           
         }
-        else{
+        else {
+            console.log("in else")
             Post.find({'_id':{'$lt':lastId}},'-upvotes -downvotes').populate('postedBy','-email -password -photo -followers -following -bio')
             .limit(0)
             .sort({createdAt: "desc"}).exec((err,posts)=>{
