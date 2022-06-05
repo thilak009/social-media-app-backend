@@ -3,15 +3,17 @@ const Comment = require('../models/Comment')
 
 exports.createPost = async(req,res)=>{
 
-    const {title,description}  = req.body
+    const {title,description,tag}  = req.body
     const userId = req.params.userId
     
     const post = new Post({
         postedBy: userId,
         title: title,
-        description: description
+        description: description,
+        tag:tag
     })
-    if(userId && title && description){
+    
+    if(userId && title && description && tag){
         try {
             const savedPost = await post.save()
 
