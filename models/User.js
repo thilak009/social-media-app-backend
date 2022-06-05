@@ -1,13 +1,6 @@
 const mongoose=require('mongoose')
 
 const userSchema = new mongoose.Schema({
-    username:{
-        type: String,
-        required:true,
-        unique: true,
-        min: 2,
-        max:255
-    },
     fullname:{
         type: String,
         max: 255
@@ -40,8 +33,7 @@ const userSchema = new mongoose.Schema({
         ref: "User"}
     ],
     role:{
-        type: Number,
-        default: 0
+        type: String,
     },
     date:{
         type: Date,

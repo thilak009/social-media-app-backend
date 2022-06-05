@@ -1,10 +1,14 @@
 const router=require('express').Router()
+const {signin,uploadFile } = require('../controllers/auth')
+const multer = require('multer')
 
-
-const {signup,signin} = require('../controllers/auth')
-
-router.post('/register',signup)
+const upload = multer({
+    storage:multer.memoryStorage()
+})
 //LOGIN
-router.post('/login',signin)
+router.post('/login', signin)
+
+//UploadFile
+router.post('/upload',upload.single('file'),uploadFile)
 
 module.exports=router;
