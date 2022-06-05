@@ -1,9 +1,10 @@
 const Post = require('../models/Posts')
 const Comment = require('../models/Comment')
 const User = require('../models/User')
+const bcrypt =require('bcryptjs')
 
 
-exports.getUserProfile=(req,res)=>{
+exports.getUserProfile= async (req,res)=>{
     const userId = req.params.userProfileId
 
     User.findOne({_id: userId},'-email -password -photo -following -followers').exec((err,user)=>{
@@ -13,6 +14,33 @@ exports.getUserProfile=(req,res)=>{
             })
         }
         return res.status(200).json(user);
+    })
+}
+
+exports.changePassword = async (req, res) => {
+    const userId = req.params.userId
+    
+    const user = await User.findOne({ _id: userId }, 'password');
+    if (!user) {
+        return res.status(400).json({
+            error:"no such user"
+        })
+    }
+    const passwords = req.body
+    console.log(passwords);
+    const validPassword = await bcrypt.compare(passwords.current_password, user.password)
+    if (!validPassword) {
+        return res.status(400).json({
+            error:"password is wrong"
+        })
+    }
+
+    var hashedPassword = await bcrypt.hash(passwords.new_password, 10);
+    user.password = hashedPassword;
+
+    const savedUser = await user.save()
+    return res.status(200).send({
+        message:"password changed successfully",
     })
 }
 

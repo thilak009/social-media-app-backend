@@ -5,6 +5,10 @@ const postSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    tag: {
+        type: String,
+        required:true  
+    },
     title:{
         type: String,
         required: true
