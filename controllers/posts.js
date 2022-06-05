@@ -72,8 +72,9 @@ exports.getAllPosts = (req,res)=>{
             Post.find({},'-upvotes -downvotes').populate('postedBy','-email -password -photo -followers -following -bio')
             .limit(10)
             .sort({createdAt: "desc"}).exec((err,posts)=>{
-                if(err){
-                    return res.json({
+                if (err) {
+                    console.log(err)
+                    return res.status(400).json({
                         message: err
                     })
                 }
@@ -82,10 +83,11 @@ exports.getAllPosts = (req,res)=>{
         }
         else{
             Post.find({'_id':{'$lt':lastId}},'-upvotes -downvotes').populate('postedBy','-email -password -photo -followers -following -bio')
-            .limit(10)
+            .limit(0)
             .sort({createdAt: "desc"}).exec((err,posts)=>{
-                if(err){
-                    return res.json({
+                if (err) {
+                    console.log(err)
+                    return res.status(400).json({
                         message: err
                     })
                 }
@@ -93,7 +95,7 @@ exports.getAllPosts = (req,res)=>{
             })
         }
     } catch (error) {
-        return res.json({
+        return res.status(400).json({
             error: error
         })
     }
@@ -164,7 +166,7 @@ exports.getVoteDetails=(req,res)=>{
     const postId = req.params.postId
     try {
         Post.findById({_id: postId}).exec((err,post)=>{
-            if(err){
+            if(err || !post){
                 return res.json({
                     message: "unable to fetch post votes details"
                 })

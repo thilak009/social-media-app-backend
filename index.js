@@ -27,6 +27,7 @@ mongoose.connect(process.env.DB_CONNECT,
 ,()=>console.log('DB connected'))
 
 
+
 app.use(express.json())
 app.use(cors())
 
