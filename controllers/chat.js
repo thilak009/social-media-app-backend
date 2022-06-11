@@ -41,3 +41,17 @@ exports.sendMessage=async(req,res)=>{
     const savedMessage = await newMessage.save()
     return res.status(200).json(savedMessage)
 }
+exports.getChatInbox = async (req, res) => {
+    const userId = req.params.userId
+    console.log("user"+userId)
+    const chat =await Chat.find({members:{"$in":[userId]}})
+    let result = []
+    let mappedArr = chat.map(async _ => {
+        console.log("chatId"+_.id)
+        let message = await Message.find({ chatId: _.id }).populate('author_id', 'fullname -_id')
+        result.push(message[message.length-1])
+        return result;
+    })
+    res.status(200).send(await Promise.all(mappedArr))
+
+}
