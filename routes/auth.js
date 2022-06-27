@@ -10,6 +10,6 @@ const upload = multer({
 router.post('/login', signin)
 
 //UploadFile
-router.post('/upload',isSignedin,upload.single('file'),uploadFile)
+router.post('/upload',upload.single('file'),uploadFile)
 
 module.exports=router;

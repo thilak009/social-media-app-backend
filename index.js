@@ -41,7 +41,7 @@ app.get('/',(req,res)=>{
     res.send("hello")
 })
 app.use('/api/helper',helperRoutes)
-app.use('/api/user',authRoutes)
+app.use('/api/user/:userId',authRoutes)
 app.use('/api/user/:userId',userRoutes)
 app.use('/api/user/profile/:userId',profileRoutes)
 app.use('/api/user/chat/:userId',chatRoutes)

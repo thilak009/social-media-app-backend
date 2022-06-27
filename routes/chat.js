@@ -6,9 +6,9 @@ const { initializeSocket } = require('../socket')
 
 
 router.get('/:otherUserId',isSignedin,checkChatRoom)
-router.get('/:chatId/get-messages',isSignedin,getAllMessages)
+router.get('/:chatId/get-messages', isSignedin, getAllMessages)
+router.post('/inbox',isSignedin,getChatInbox)
 
 router.post('/:chatId/send',isSignedin,sendMessage)
-router.post('/inbox',isSignedin,getChatInbox)
 
 module.exports = router

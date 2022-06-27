@@ -2,7 +2,9 @@ const {Chat,Message} = require('../models/Inbox')
 const User = require('../models/User')
 const { initializeSocket } = require('../socket')
 
-exports.checkChatRoom=async(req,res)=>{
+exports.checkChatRoom = async (req, res) => {
+    console.log("check chat room")
+    console.log(req.params);
     const userId = req.params.userId
     const otherUserId = req.params.otherUserId
 
@@ -21,7 +23,8 @@ exports.checkChatRoom=async(req,res)=>{
     }
     return res.status(200).json(chatPresent)
 }
-exports.getAllMessages=async(req,res)=>{
+exports.getAllMessages = async (req, res) => {
+    console.log("in get all messages")
     const chatId = req.params.chatId
 
     const messages = await Message.find({chatId: chatId})
@@ -29,6 +32,7 @@ exports.getAllMessages=async(req,res)=>{
 }
 exports.sendMessage=async(req,res)=>{
 
+    console.log("in send message")
     const userId = req.params.userId
     const chatId = req.params.chatId
     const {message} = req.body
@@ -41,16 +45,23 @@ exports.sendMessage=async(req,res)=>{
     const savedMessage = await newMessage.save()
     return res.status(200).json(savedMessage)
 }
+
 exports.getChatInbox = async (req, res) => {
+    console.log("in controller")
     const userId = req.params.userId
-    console.log("user"+userId)
-    const chat =await Chat.find({members:{"$in":[userId]}})
-    let result = []
-    let mappedArr = chat.map(async _ => {
-        console.log("chatId"+_.id)
+    const chat = await Chat.find({ members: { "$in": [userId] } })
+    let mappedArr = await chat.map(async _ => {
         let message = await Message.find({ chatId: _.id }).populate('author_id', 'fullname -_id')
-        result.push(message[message.length-1])
-        return result;
+        let chatName = _.members.find(member => member != userId)
+        let messageResult = message[message.length - 1]
+        var messageResponse = {
+            "message_id": messageResult.id,
+            "last_message": messageResult.message,
+            "chat_id": messageResult.chatId,
+            "last_message_sender": messageResult.author_id.fullname,
+            "other_user_details": await User.findById(chatName, 'fullname photo')
+        }
+        return messageResponse
     })
     res.status(200).send(await Promise.all(mappedArr))
 

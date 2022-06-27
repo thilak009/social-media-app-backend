@@ -38,6 +38,7 @@ exports.uploadFile = async (req, res) => {
         const file_buffer = req.file['buffer']
         const file_stream = bufferToStream(file_buffer)
         
+        console.log(file_stream)
         readXlsxFile(file_stream).then(
             async (rows) => {
                 var obj = convertToJSON(rows)
